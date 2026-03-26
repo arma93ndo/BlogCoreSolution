@@ -1,0 +1,33 @@
+﻿@model BlogCoreSolution.Models.ViewModels.HomeVM
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="text-center">
+    <div class="col-sm-12">
+        <h1 class="text-center text-dark bg-secondary py-1">Últimos cursos y tutoriales</h1>
+    </div>
+</div>
+
+@if (Model.ListaArticulos.Count() > 0)
+{
+    <hr />
+    <div class="row">
+        @foreach (var articulo in Model.ListaArticulos.OrderBy(o => o.Id))
+        {
+            <div class="col-4">
+                <div class="card">
+                    <img src="@articulo.UrlImagen" class="img-thumbnail" width="100%" />
+                    <h5 class="card-body">@articulo.Nombre</h5>
+                    <a asp-action="Detalle" class="btn btn-success" style="border-radius: 10px" asp-route-id="@articulo.Id">
+                        Más información
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No hay artículos</p>
+}

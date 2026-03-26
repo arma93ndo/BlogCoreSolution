@@ -1,0 +1,97 @@
+﻿@model BlogCoreSolution.Models.ViewModels.ArticuloVM
+
+@{
+    ViewData["Title"] = "Editar Artículo"; 
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css">
+<br />
+<br />
+<h2 class="text-center">Editar artículo</h2>
+<form method="post" asp-action="Edit" enctype="multipart/form-data">
+    <!-- Se envía el Id del artículo como campo oculto -->
+    <input type="hidden" asp-for="Articulo.Id" />
+    <div class="row px-2 offset-1 border">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-8  mt-4">
+            <div class="form-group row mt-2">
+                <div class="col-4">
+                    <label asp-for="Articulo.Nombre"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Articulo.Nombre" class="form-control" placeholder="Ingresa el nombre del artículo" />
+                    <span asp-validation-for="Articulo.Nombre" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row mt-2">
+                <div class="col">
+                    <label asp-for="Articulo.Descripcion"></label>
+                </div>
+                <div class="col-8">
+                    <textarea asp-for="Articulo.Descripcion" id="Contenido" class="form-control" stype="height: 300px;"></textarea>
+                    <span asp-validation-for="Articulo.Descripcion" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row mt-2">
+                <div class="col">
+                    <label asp-for="Articulo.CategoriaId" class="form-label"></label>
+                    <select asp-for="Articulo.CategoriaId" asp-items="Model.ListaCategorias" class="form-control">
+                        <option value="">-- Selecciona una Categoría --</option>
+                    </select>
+                    <span asp-validation-for="Articulo.CategoriaId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row mt-2">
+                <div class="col">
+                    <label asp-for="Articulo.UrlImagen"></label>
+                </div>
+                <div class="col-8">
+                    <input type="file" class="form-control" name="archivos" id="subidaArchivo" />
+                    <span asp-validation-for="Articulo.UrlImagen" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group-row mt-4">
+                <div class="col">
+                    <div class="row">
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary form-control">Editar</button>
+                        </div>
+                        &nbsp;
+                        <div class="col">
+                            <a asp-action="Index" class="btn btn-success">Volver atrás</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 pt-3">
+            <img src="@Model.Articulo.UrlImagen" width="300" style="border-radius: 5px; border: 1px solid #bbb9b9"/>
+        </div>
+
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/8.1.2/tinymce.min.js" integrity="sha512-t6rAWTkTP6kPQfG/mJ6ZojKT7kyJxw6//GQrS2QhYZoGW6oMWSWm7v/ur+sxoHDq1WaZqlOiZwI0D0HU7lgoeQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'lists',
+            menubar: 'file edit format'
+        });
+    </script> *@
+
+    <script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
+    <script>
+        new SimpleMDE({ element: document.getElementById("Contenido") });
+    </script>
+}

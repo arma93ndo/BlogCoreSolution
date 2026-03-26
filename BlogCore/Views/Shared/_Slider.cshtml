@@ -1,0 +1,35 @@
+﻿@model BlogCoreSolution.Models.ViewModels.HomeVM
+<!-- Slider -->
+<div id="sliderImagenes" class="carousel slide">
+    <div class="carousel-inner">
+        @{
+            var slidersActivos = Model.Sliders.Where(s => s.Estado).ToList();
+        }
+
+        @if (Model?.Sliders != null) // El view model sí contiene datos.
+        {
+            @for (int i = 0; i < slidersActivos.Count; i++)
+            {
+                var itemDinamico = i == 0 ? "active" : ""; // Poner la clase "active" sólo al primer slider recibido.
+
+                <div class="carousel-item @itemDinamico">
+                    <img src="@Url.Content(slidersActivos[i].UrlImagen)" class="d-block w-100"/>
+                    <h1 class="text-white text-center bg-dark py-1">
+                        @Html.Raw(slidersActivos[i].Nombre)
+                    </h1>
+                </div>
+            }
+        }
+
+        
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#sliderImagenes" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#sliderImagenes" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+<!-- Cierre de Slider -->
