@@ -11,6 +11,7 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using BlogCoreSolution.Models;
+using BlogCoreSolution.Utilidades;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,13 +31,15 @@ namespace BlogCore.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +47,7 @@ namespace BlogCore.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -98,6 +102,20 @@ namespace BlogCore.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            // Campos personalizados, provenientes de la clase ApplicationUser.
+            [Required(ErrorMessage = "El nombre es obligatorio")]
+            public string Nombre { get; set; }
+            [Required(ErrorMessage = "La dirección es obligatoria")]
+            public string Direccion { get; set; }
+            [Required(ErrorMessage = "La ciudad es obligatoria")]
+            public string Ciudad { get; set; }
+            [Required(ErrorMessage = "El país es obligatorio")]
+            public string Pais { get; set; }
+
+            [Required(ErrorMessage = "El teléfono es obligatorio")]
+            [Display(Name = "Teléfono")]
+            public string PhoneNumber { get; set; }
         }
 
 
@@ -115,25 +133,58 @@ namespace BlogCore.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
+                // Con las siguientes líneas, almacenamos los campos personalizados.
+                user.Nombre = Input.Nombre;
+                user.Direccion = Input.Direccion;
+                user.Ciudad = Input.Ciudad;
+                user.Pais = Input.Pais;
+                user.PhoneNumber = Input.PhoneNumber;
+
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
+                    // Aquí validamos si los roles existen, si no, se crean.
+                    if (!await _roleManager.RoleExistsAsync(CNT.Administrador))
+                    { // Si no existe el rol, por ejemplo, Administrador; crea los 3.
+                        await _roleManager.CreateAsync(new IdentityRole(CNT.Administrador));
+                        await _roleManager.CreateAsync(new IdentityRole(CNT.Registrado));
+                        await _roleManager.CreateAsync(new IdentityRole(CNT.Cliente));
+                    }
+
+                    // Obtenemos el rol seleccionado desde el form.
+                    string rol = Request.Form["radUsuarioRole"].ToString();
+
+                    // Validamos si el rol seleccionado es Admin, en caso de serlo, lo añadimos al usuario en específico.
+                    if (rol == CNT.Administrador)
+                    {
+                        await _userManager.AddToRoleAsync(user, CNT.Administrador);
+                    }
+                    else if (rol == CNT.Registrado)
+                    {
+                        await _userManager.AddToRoleAsync(user, CNT.Registrado);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, CNT.Cliente);
+                    }
+
+
                     _logger.LogInformation("User created a new account with password.");
 
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                    //var userId = await _userManager.GetUserIdAsync(user);
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    //var callbackUrl = Url.Page(
+                    //    "/Account/ConfirmEmail",
+                    //    pageHandler: null,
+                    //    values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                    //    protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

@@ -17,7 +17,7 @@ function cargarDatatable() {
             { "data": "nombre", "width": "20%" },
             { "data": "categoria.nombre", "width": "10%" },
             {
-                "data": "UrlImagen",
+                "data": "urlImagen",
                 "width": "20%",
                 "render": function (imagen) {
 

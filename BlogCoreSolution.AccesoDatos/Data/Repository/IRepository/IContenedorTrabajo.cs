@@ -10,6 +10,7 @@ namespace BlogCoreSolution.AccesoDatos.Data.Repository.IRepository
         ICategoriaRepository Categoria { get; }
         IArticuloRepository Articulo { get; }
         ISliderRepository Slider { get; }
+        IUsuarioRepository Usuario { get; }
 
         void Save(); // Se usará para persistir los datos hechos al contexto.
     }
